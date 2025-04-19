@@ -14,6 +14,7 @@ import {
     DxMasterDetail,
     DxExport
 } from "devextreme-vue/data-grid";
+import type { DxDataGridTypes } from 'devextreme-vue/data-grid';
 
 import {Workbook} from "exceljs";
 import saveAs from "file-saver"
@@ -214,6 +215,37 @@ const exportGrid =(e:any)=> {
   }
 }
 
+// Customize command buttons with Tailwind
+function onCellPrepared(e: DxDataGridTypes.CellPreparedEvent) {
+  if (e.rowType === 'data' && e.column.command === 'edit') {
+    const container = e.cellElement;
+
+    // Remove default content
+    container.innerHTML = '';
+
+    // Edit button
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '✏️ Edit';
+    editBtn.className =
+        'cursor-pointer bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-400 mr-2';
+    editBtn.addEventListener('click', () => {
+      e.component.editRow(e.rowIndex);
+    });
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑️ Delete';
+    deleteBtn.className =
+        'cursor-pointer bg-red-600 text-white px-3 py-1 rounded hover:bg-red-400';
+    deleteBtn.addEventListener('click', () => {
+      e.component.deleteRow(e.rowIndex);
+    });
+
+    container.appendChild(editBtn);
+    container.appendChild(deleteBtn);
+  }
+}
+
 </script>
 
 <template>
@@ -235,6 +267,7 @@ const exportGrid =(e:any)=> {
           :column-auto-width="true"
           @selection-changed="selectEmployee"
           @exporting="exportGrid"
+          @cell-prepared="onCellPrepared"
       >
         <DxFilterRow :visible="true" />
         <DxSearchPanel :visible="true" />
